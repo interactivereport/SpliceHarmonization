@@ -1,0 +1,38 @@
+sample_info:  #path to the sample file contains a table separated by tab (\t) with required columns: Sample_Name, <some group column(s)>
+compare_info: # path to the comparison file contains three column table separated by tab (\t) with required columns: Group, Alt, Ref
+bam_path:  #path to a folder contains alignment bam files as <Sample_Name>.<bam_suffix>
+bam_suffix: Aligned.sortedByCoord.out.bam 
+genome_fa: # unzip please, NOT gz
+genome_gtf: # unzip please, NOT gz
+run: [leafcutter,rmats,stringtie,majiq,mastertable] # methods to run: leafcutter,rmats,stringties,majiqs,mastertable
+output_path: 
+TST: # if provided, a project folder will be created imitate the one downloaded from AWSomics
+reads_type: paired
+read_length: 101
+strand: 1
+
+leafcutter_anchor_len: 8
+leafcutter_min_intron_len: 50
+leafcutter_max_intron_len: 50000
+leafcutter_min_cluster_reads: 30
+leafcutter_min_cluster_ratio: 0.001
+leafcutter_min_samples_per_intron: 2
+leafcutter_min_samples_per_group: 2
+leafcutter_plots_fdr: 0.05
+leafcutter_max_plots: 30
+leafviz_fdr_threshold: 1
+
+rmats_variable_read_length: False
+rmats_cstat: 0.0001
+rmats_paired_stats: False
+rmats_novel_splice_sites: False
+rmats_min_intron_length_for_nss: 
+rmats_max_exon_length_for_nss:
+rmats_allow_clipping: False
+
+stringtie_min_cov: 3
+stringtie_min_jxn_cov: 3
+stringtie_min_isoform_frac: 0.001
+
+majiq_cutoffs: [0.1,0.2,0.3,0.4]
+
