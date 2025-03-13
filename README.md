@@ -6,6 +6,6 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
 ## Installation 
 - pull SpliceHarmonization from github \
         `git clone https://github.com/interactivereport/SpliceHarmonization.git`
-- enter the 'install' folder and install SpliceHarmonization \
+- enter the folder and install SpliceHarmonization \
         `cd install` \
         `conda create -n ennv -f install.yml`
