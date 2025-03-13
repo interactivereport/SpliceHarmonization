@@ -8,4 +8,4 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
         `git clone https://github.com/interactivereport/SpliceHarmonization.git`
 - enter the folder and install SpliceHarmonization \
         `cd install` \
-        `conda create -n ennv -f install.yml`
+        `conda create -n env -f install.yml`
