@@ -3,7 +3,7 @@
 ## About
 SpliceHarmonization is an integrated approach that leverages the strengths of different alternative splicing detection methods, thereby facilitating robust and reliable analysis of splicing events with annotations.
 
-## Installation 
+### Installation 
 - pull SpliceHarmonization from github \
         `git clone https://github.com/interactivereport/SpliceHarmonization.git`
 - enter the folder and install SpliceHarmonization \
