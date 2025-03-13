@@ -1,0 +1,7 @@
+input_csv: /mnt/depts/dept04/compbio/projects/TST12320/simulation_demo/simulation_input.csv
+reference: /edgehpc/dept/compbio/projects/splice_pipeline_BSSI/mry_annot/Human.GRCh38.v34.l1_5.ERCC.ref.fa
+exon_label: /home/ychen12/splicing/TST12320/event_analysis_test_pipeline/1000-nM-risdiplam_vs_DMSO/harm/exon_relabel.csv
+wd: /home/ychen12/splicing_test/edge_splicing/splicing_harmonization/SpliceHarmonization/simulation/data
+lowCounts: '2000'
+highCounts: '5000'
+
