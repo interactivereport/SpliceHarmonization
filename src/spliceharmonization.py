@@ -6,6 +6,7 @@ import shutil
 import argparse
 from datetime import datetime
 import yaml
+from SpliceEventSumbit import SpliceHarmJobSubmitter
 
 def get_arg(base_dir):
     strPipePath =  os.path.join(base_dir, "SpliceEvent")
@@ -31,12 +32,14 @@ def main():
     
 
     strPrj = os.path.join(args.wdir, f"{timestamp}_{user}")
+    # strPrj = os.path.join(args.wdir, '20250312233909_ychen12')
     
     with open(args.cfig, 'r') as file:
         g_config = yaml.safe_load(file)
     
 
     g_config['wdir'] = strPrj
+    g_config['indir'] = strPrj
 
     with open('config.yml', 'w') as file:
         yaml.dump(g_config, file)
@@ -58,14 +61,18 @@ def main():
         sys.exit(0)
     
     print("Before calling SplicePrep.main()", flush=True)
-    # SplicePrep.main(args.cfig, args.wdir)
+    SplicePrep.main(args.cfig, args.wdir)
+
+    # print(g_config)
 
     g_config = yaml.safe_load(args.cfig)
 
     # print("After SplicePrep.main(), project folder is located at:", spliceprep_path, flush=True)
     # delattr(args, 'cfig')
     print("Before calling SpliceEvent.main()", flush=True)
-    SpliceEvent.main(args.cfig)
+
+    SpliceHarmJobSubmitter.main(args.cfig)
+    
     print(args)
     print("After calling SpliceEvent.main()", flush=True)
     
