@@ -1,4 +1,4 @@
-import os,sys,yaml,subprocess,re,glob,shutil
+import os,sys,yaml,subprocess,re,glob,shutil,time
 import pandas as pd
 from datetime import datetime
 from slurmUtils import create_sbatch_script, write_sbatch_script
@@ -10,7 +10,7 @@ class SplicePrepPipeline:
         self.g_config = None
         self.g_sysConfig = None
         self.g_script=None
-        self.spliceprep_dir = None
+        # self.spliceprep_dir = None
 
     def msgError(self, msg):
         print('\n'.join(msg))
@@ -256,7 +256,7 @@ class SplicePrepPipeline:
             a = f.write('\n'.join(allF))
         #cmd.append("cd %s"%os.path.dirname(listF))
         cmd.append("python %s --juncfiles %s --minclureads %d --mincluratio %f --outprefix %s --maxintronlen %d --rundir %s"%(
-            os.path.join(self.g_pipePath,'src','leafcutter_cluster_regtools.py'),
+            os.path.join(self.g_pipePath,'src/SplicePrep','leafcutter_cluster_regtools.py'),
             listF,
             self.g_config['leafcutter_min_cluster_reads'],
             self.g_config['leafcutter_min_cluster_ratio'],
@@ -425,9 +425,43 @@ class SplicePrepPipeline:
         cmd=["module load MAJIQ/2.2.0",'export TMPDIR=/tmp']
         cmd.append("voila tsv %s %s -f %s --changing-between-group-dpsi %.2f --threshold %.2f --show-all -j 8"%(splicegraph,deltapsi,strVoila,cutoff,cutoff))
         return self.getOneSbatch('MJ_%s_%.2f'%(os.path.basename(strOut),cutoff),strSbatch,cmd,CoreNum=8)
+    
+
+    def wait_for_jobs_to_complete(self, timeout=14400, poll_interval=10):
+        """
+        Polls the log files until all submitted jobs have 'DONE' in the last line
+        or until a timeout is reached.
+        """
+        start_time = time.time()
+        while True:
+            all_done = True
+            for job in self.g_config['run']:
+                log_files = glob.glob(os.path.join(self.g_config['output_path'], f'{job}_output', 'sbatch', '*log'))
+                for log_file in log_files:
+                    # Only check logs that have a corresponding sh file (job was executed)
+                    sh_file = re.sub('log$', 'sh', log_file)
+                    if not os.path.isfile(sh_file):
+                        continue
+                    with open(log_file, 'r') as f:
+                        lines = f.readlines()
+                        # If file is empty or doesn't end with 'DONE', mark as not done
+                        if not lines or not lines[-1].startswith('DONE'):
+                            all_done = False
+                            break  # break inner loop to poll again
+                if not all_done:
+                    break  # break outer loop as well
+            if all_done:
+                print("All jobs are complete.")
+                break
+            elif time.time() - start_time > timeout:
+                print("Timeout reached while waiting for jobs to complete.")
+                break
+            else:
+                print("Waiting for jobs to complete...")
+                time.sleep(poll_interval)
 
     
-    def finalize(self, strConfig,jIDs=None):
+    def finalize(self, strConfig, strPrj, jIDs=None):
         if jIDs is not None:
             print("Finalize job")
             if len(jIDs)>0:
@@ -441,9 +475,12 @@ class SplicePrepPipeline:
                     dependency = ','.join(jIDs)
                     subprocess.run("sbatch --dependency=afterok:%s %s" % (dependency, oneScript),
                                shell=True, check=True, capture_output=True, text=True)
-            return
+            # return
+        
         self.getConfig(strConfig)
         self.getSysConfig()
+        self.wait_for_jobs_to_complete()
+        
         # check the submitted jobs
         print("Checking the completed jobs:")
         for job in self.g_config['run']:
@@ -459,11 +496,11 @@ class SplicePrepPipeline:
                         print("\t\tError in", os.path.basename(log_file))
         # create projects
         print("Finalizing files ...")
-        strPrj = None
+        # strPrj = None
         if self.g_config['TST'] is not None:
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-            user = os.getenv('USER')
-            strPrj = os.path.join(self.g_sysConfig['localPath'], self.g_config['TST'], f"{timestamp}_{user}")
+            # timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            # user = os.getenv('USER')
+            # strPrj = os.path.join(self.g_sysConfig['localPath'], self.g_config['TST'], f"{timestamp}_{user}")
             os.makedirs(strPrj, exist_ok=True)
             shutil.copy(self.g_config['sample_info'], strPrj)
             shutil.copy(self.g_config['compare_info'], strPrj)
@@ -492,9 +529,9 @@ class SplicePrepPipeline:
         if strPrj is not None:
             print("\n*** A project folder is created in: %s***\n"%strPrj)
         
-        return strPrj
+        return 
 
-    def run(self, strConfig):
+    def run(self, strConfig, strPrj):
         # Load config from command-line argument (sys.argv[2])
         self.getConfig(strConfig)
         self.checkConfig()
@@ -505,32 +542,27 @@ class SplicePrepPipeline:
         allJobs += self.leafcutter_run(index_jobID) or []
         allJobs += self.rmats_run() or []
         allJobs += self.majiq_run(index_jobID) or []
-        self.spliceprep_dir = self.finalize(strConfig, allJobs)
-        return self.spliceprep_dir
+        self.finalize(strConfig, strPrj, allJobs)
+        return 
 
-def main(config_file=None):
+def main(config_file=None, strPrj=None):
     pipeline = SplicePrepPipeline()
     if config_file is not None:
-        folder = pipeline.run(config_file)
-        print("Folder path:", pipeline.folder_path)
-        return folder
+        pipeline.run(config_file, strPrj)
+        return
 
     # Otherwise, use sys.argv to determine mode and config.
     mode = sys.argv[1] if len(sys.argv) > 1 else 'main'
     if len(sys.argv) > 2:
         config_file = sys.argv[2]
-    else:
-        config_file = 'config.yml'
+    # else:
+    #     config_file = 'config.yml'
     
     if mode == 'main':
-        folder = pipeline.run(config_file)
-        print("Folder path:", pipeline.folder_path)
-        return folder
+        pipeline.run(config_file, strPrj)
     
     elif mode == 'final':
-        folder = pipeline.finalize(config_file)
-        print("Folder path:", folder)
-        return folder
+        pipeline.finalize(config_file, strPrj) 
     else:
         pipeline.msgError(["Error: unknown task: %s" % mode])
 

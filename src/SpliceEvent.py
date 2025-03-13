@@ -6,18 +6,22 @@ from tabulate import tabulate
 from slurmUtils import slurmScript, slurmArray
 
 class SpliceEventPipeline:
-    def __init__(self, args=None):
+    def __init__(self):
         self.strPipePath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.GTFpath = '/edgehpc/dept/compbio/reference/DNAnexus_references'
         self.retryN = 2
-        self.args = args
-
+        self.g_config = None
+    
     def exit_with_msg(self, msg=""):
         if len(msg)>3:
             print(msg)
         sys.exit(1)
+
+    def getConfig(self, strConfig):
+        with open(strConfig,'r') as f:
+            self.g_config = yaml.safe_load(f)
     
-    def msg_init(self, wd):
+    def msg_init(self):
         print("\n\n*****",datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"*****")
         if os.path.isdir(os.path.join(self.strPipePath,".git")):
             gitConfig = configparser.ConfigParser()
@@ -31,85 +35,47 @@ class SpliceEventPipeline:
             rInfo.append(f"## Pipeline Path: {self.strPipePath}\n")
             rInfo.append(f"## Pipeline Date: {datetime.fromtimestamp(int(gitLog[-2])).strftime('%Y-%m-%d %H:%M:%S')} {gitLog[-1]}\n")
             rInfo.append(f"## git HEAD: {gitLog[1]}\n###########\n\n")
-            rInfo.append(f"{self.strPipePath}/SpliceEvent_run {' '.join(sys.argv[1:])}\n")
+            rInfo.append(f"{self.strPipePath}/SpliceEvent_run {' '.join(sys.argv[3:])}\n")
+            print(rInfo)
             print(''.join(rInfo))
-            with open(os.path.join(wd,'_cmdline_'+datetime.now().strftime('%Y%m%d.%H%M%S')),'w') as f:
+            with open(os.path.join(self.g_config['wdir'],'_cmdline_'+datetime.now().strftime('%Y%m%d.%H%M%S')),'w') as f:
                 f.writelines(rInfo)
             #print("## Run Date: ",datetime.now())
             #print("## Pipeline Path: %s"%self.strPipePath)
             #print("## Pipeline Date: %s %s"%(datetime.fromtimestamp(int(gitLog[-2])).strftime('%Y-%m-%d %H:%M:%S'),gitLog[-1]))
             #print("## git HEAD: %s\n###########\n"%gitLog[1])
 
-    # def get_arg(self, args):
-    #     parser = argparse.ArgumentParser(description="How to use SpliceEvent pipeline")
-    #     parser.add_argument('-indir',required=True, dest="indir", help ='data directory')
-    #     parser.add_argument('-wdir',required=True, dest="wdir", help='working directory')
-    #     parser.add_argument('-ref', dest='ref', help="reference .gtf",default=None)
-    #     parser.add_argument('-bamindir', dest='bamindir', help='bam data directory', default=None)
-    #     parser.add_argument('-specific_comparison', dest= 'specific_comparison', help = "identify your specific comparison substring separated by ,", default=None)
-    #     parser.add_argument('-junction_filter', dest='junction_filter', type=bool, help="open or close this filter", default=False)
-    #     parser.add_argument('-majiq_cutoff_val', dest='majiq_cutoff_val', type=float, default=0.95)
-    #     parser.add_argument('-junctionFC', dest='junctionFC', type=float, default=1.2)
-    #     parser.add_argument('-junctionMAX', dest='junctionMAX', type=float, default=25)
-    #     parser.add_argument('-samplesheet', dest='samplesheet', help= 'sample sheet file', default=None)
-    #     parser.add_argument('-addexons', dest='addexons', help= 'added exons sheet file', default=os.path.join(self.strPipePath,'data','added_exon.csv'))
-    #     parser.add_argument('-cmdonly',dest='cmdonly',help='only save all slurm bash files, not submit',default=False)
-    #     args = parser.parse_args()
-    #     if not os.path.isdir(args.indir):
-    #         self.exit_with_msg('Missing fastr splicing folder: %s'%args.indir)
-    #     if not os.path.isdir(os.path.dirname(args.wdir)):
-    #         self.exit_with_msg('Missing output folder: %s'%os.path.dirname(args.wdir))
-    #     os.makedirs(args.wdir,exist_ok=True)
-    #     if args.ref is None:
-    #         strAna = glob.glob(os.path.join(args.indir,'analysis-*'))[0]
-    #         if os.path.isfile(strAna):
-    #             with open(strAna,'r') as f:
-    #                 aInfo = yaml.safe_load(f)
-    #             version = aInfo["FASTR_REFERENCE_VERSION"]
-    #             args.ref = os.path.join(self.GTFpath,'rnaseq',
-    #                 aInfo["FASTR_REFERENCE_SPECIES"],
-    #                 version,"%s.transcript.gtf.gz"%version)
-    #     if args.ref is None or not os.path.isfile(args.ref):
-    #         self.exit_with_msg('Missing reference GTF: %s'%args.ref)
-    #     if args.junction_filter:
-    #         if args.samplesheet is None or args.bamindir is None or not os.path.isfile(args.samplesheet) or not os.path.isdir(args.bamindir):
-    #             self.exit_with_msg(f'junction_filter (True) requires samplesheet ({args.samplesheet}) and bamindir ({args.bamindir})')
-    #     #parser.print_help()
-    #     return args
-
-    def get_comparison(self, args):
-        #with open('args.pkl','wb') as f:
-        #    pickle.dump(args,f)
-        stringtie_path = os.path.join(args.indir, "stringtie")
+    def get_comparison(self):
+        stringtie_path = os.path.join(self.g_config['indir'], "stringtie")
         if not os.path.isdir(stringtie_path):
             self.exit_with_msg("Missing stringtie folder: %s"%stringtie_path)
-        comp = [re.sub('.combined.gtf$','',os.path.basename(_)) for _ in glob.glob(os.path.join(stringtie_path,"*.combined.gtf"))]
-        if args.specific_comparison is not None:
-            speComp = args.specific_comparison.split(',')
+        comp = [re.sub('.combined.gtf$','', os.path.basename(_)) for _ in glob.glob(os.path.join(stringtie_path,"*.combined.gtf"))]
+        if self.g_config['specific_comparison'] is not None:
+            speComp = self.g_config['specific_comparison'].split(',')
             comp = [_ for _ in comp if any(s in _ for s in speComp)]
         if len(comp) == 0:
             self.exit_with_msg("No specific comparison found from stringtie")
         return(comp)
 
-    def process_comparison(self, args,cList):
+    def process_comparison(self,cList):
         cmd = {}
         for one in cList:
-            cmd[one] = self.get_one_cmd(args,one)
-        if args.cmdonly:
+            cmd[one] = self.get_one_cmd(one)
+        if self.g_config.cmdonly:
             for k in cmd:
                 for k1 in sorted(cmd[k].keys()):
                     self.run_slurm_job(cmd[k][k1],k1,submit=False)
         else:
-            while self.parallel_monitor(cmd,args.wdir):
+            while self.parallel_monitor(cmd,self.g_config['wdir']):
                 time.sleep(60)
 
-    def get_one_cmd(self, args,oneComp):
-        data_folder = args.indir
-        bam_folder =args.bamindir
-        wd_folder = args.wdir
-        reference = args.ref
-        specific_comparison_str = args.specific_comparison
-        sample_sheet_file = args.samplesheet
+    def get_one_cmd(self,oneComp, args):
+        data_folder = self.g_config['indir']
+        bam_folder = self.g_config['bam_path']
+        wd_folder = self.g_config['wdir']
+        reference = self.g_config['genome_gtf']
+        specific_comparison_str = self.g_config['specific_comparison']
+        sample_sheet_file = self.g_config['sample_info']
         file_prefix = os.path.join(wd_folder,oneComp)
         os.makedirs(os.path.join(file_prefix,'junction_prep'), exist_ok=True)
 
@@ -346,36 +312,39 @@ class SpliceEventPipeline:
         df = df[df.State=='FAILED']
         return 'FAILED',[_.split("_")[-1] for _ in df.JobID.to_list()]
 
-    def resume_task(self, args):
+    def resume_task(self):
         #print(args)
-        if args.specific_comparison is not None:
+        if self.specific_comparison is not None:
             return False
-        comp = self.get_comparison(args)
+        comp = self.get_comparison()
         rJobs = []
         Resumed=False
+        # print(self.g_args.wdir)
         for one in comp:
-            if not os.path.isfile(os.path.join(args.wdir,one,"run1.sh")):
+            if not os.path.isfile(os.path.join(self.g_config['wdir'],one,"run1.sh")):
                 rJobs.append(one)
                 continue
-            strF = os.path.join(args.wdir,one,"run4.o.log")
+            strF = os.path.join(self.g_config['wdir'],one,"run4.o.log")
             if os.path.isfile(strF):
                 with open(strF,'r') as f:
                     flines = f.readlines()
                 if flines[-1].startswith("DONE"):
                     continue
             # old pipeline results
-            strF = os.path.join(args.wdir,one,"harm_run_4.e.log")
+            strF = os.path.join(self.g_config['wdir'],one,"harm_run_4.e.log")
             if os.path.isfile(strF) and os.stat(strF).st_size==0:
                 continue
             rJobs.append(one)
             Resumed=True
         if len(rJobs)==0:
-            print("\n",args.wdir)
+            print("\n",self.g_config['wdir'])
             print("*** All previous SplicingEvent jobs are completed in above folder!  ***")
             return True
-        cmd = f"{self.strPipePath}/SpliceEvent.py {' '.join(sys.argv[1:])} -specific_comparison '%s'"%(",".join(rJobs))
+        cmd = (f"{self.strPipePath}/SpliceEvent.py " + " ".join(sys.argv[1]) +" -specific_comparison '%s'" % (",".join(rJobs)))
+        print(cmd)
         print("\nThe following %d jobs will be resubmited: "%len(rJobs),"; ".join(rJobs))
-        a = subprocess.run(f"nohup {cmd} &> {os.path.join(args.wdir,'.log_'+datetime.now().strftime('%Y%m%d_%H%M%S'))} &",shell=True)
+        
+        a = subprocess.run(f"nohup {cmd} &> {os.path.join(self.g_config['wdir'],'.log_'+datetime.now().strftime('%Y%m%d_%H%M%S'))} &",shell=True)
         if Resumed:
             print("\n*** Resuming prevous SplicingEvent jobs! Please check the status ***")
         else:
@@ -383,44 +352,48 @@ class SpliceEventPipeline:
         return True
 
 
-    def run(self):
-        if not os.path.isdir(self.args.indir):
-            self.exit_with_msg('Missing fastr splicing folder: %s'%self.args.indir)
-        if not os.path.isdir(os.path.dirname(self.args.wdir)):
-            self.exit_with_msg('Missing output folder: %s'%os.path.dirname(self.args.wdir))
-        os.makedirs(self.args.wdir,exist_ok=True)
-        if self.args.ref is None:
-            strAna = glob.glob(os.path.join(self.args.indir,'analysis-*'))[0]
-            if os.path.isfile(strAna):
-                with open(strAna,'r') as f:
-                    aInfo = yaml.safe_load(f)
-                version = aInfo["FASTR_REFERENCE_VERSION"]
-                self.args.ref = os.path.join(self.GTFpath,'rnaseq',
-                    aInfo["FASTR_REFERENCE_SPECIES"],
-                    version,"%s.transcript.gtf.gz"%version)
-        if self.args.ref is None or not os.path.isfile(self.args.ref):
-            self.exit_with_msg('Missing reference GTF: %s'%self.args.ref)
-        if self.args.junction_filter:
-            if self.args.samplesheet is None or self.args.bamindir is None or not os.path.isfile(self.args.samplesheet) or not os.path.isdir(self.args.bamindir):
-                self.exit_with_msg(f'junction_filter (True) requires samplesheet ({self.args.samplesheet}) and bamindir ({self.args.bamindir})')
+    # def run(self):
+    #     if not os.path.isdir(args.indir):
+    #         self.exit_with_msg('Missing fastr splicing folder: %s'%args.indir)
+    #     if not os.path.isdir(os.path.dirname(args.wdir)):
+    #         self.exit_with_msg('Missing output folder: %s'%os.path.dirname(args.wdir))
+    #     os.makedirs(args.wdir,exist_ok=True)
+    #     if args.ref is None:
+    #         strAna = glob.glob(os.path.join(args.indir,'analysis-*'))[0]
+    #         if os.path.isfile(strAna):
+    #             with open(strAna,'r') as f:
+    #                 aInfo = yaml.safe_load(f)
+    #             version = aInfo["FASTR_REFERENCE_VERSION"]
+    #             args.ref = os.path.join(self.GTFpath,'rnaseq',
+    #                 aInfo["FASTR_REFERENCE_SPECIES"],
+    #                 version,"%s.transcript.gtf.gz"%version)
+    #     if args.ref is None or not os.path.isfile(args.ref):
+    #         self.exit_with_msg('Missing reference GTF: %s'%args.ref)
+    #     if args.junction_filter:
+    #         if args.samplesheet is None or args.bamindir is None or not os.path.isfile(args.samplesheet) or not os.path.isdir(args.bamindir):
+    #             self.exit_with_msg(f'junction_filter (True) requires samplesheet ({args.samplesheet}) and bamindir ({args.bamindir})')
 
-        if self.resume_task(self.args):
-            return
+    #     if self.resume_task():
+    #         return
     
-        self.msg_init(self.args.wdir)
-        compList = self.get_comparison(self.args)
-        self.process_comparison(self.args,compList)
+        # self.msg_init(args.wdir)
+        # compList = self.get_comparison()
+        # self.process_comparison(self.args,compList)
 
 
-
-def main(args=None):
-    if args is None:
-        print('No required arg inputs')
-    else:
-        start_time = time.time()
-        pipeline = SpliceEventPipeline()
-        pipeline.run()
-        print("\n--- total time passed %s seconds ---" % (time.time() - start_time))
-
+def main(strConfig):
+    # Create an instance of the class
+   
+    # self.getConfig(strConfig)
+    pipeline = SpliceEventPipeline() 
+    pipeline.getConfig(strConfig) 
+    if pipeline.resume_task():
+        return
+    
+    pipeline.msg_init()
+    compList = pipeline.get_comparison()
+    pipeline.process_comparison(compList)
+# Standalone fallback: If this module is run directly, parse global args.
 if __name__ == '__main__':
+
     main()
