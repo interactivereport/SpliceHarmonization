@@ -17,4 +17,4 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
 - prepare the config.yml and input data \
         Details in the supplemental materials 
 - start simulation \
-        `python ./SpliceSimulator.py -cfig ./config.ymll`
+        `python ./SpliceSimulator.py -cfig ./config.yml`
