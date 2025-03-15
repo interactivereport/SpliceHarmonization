@@ -15,6 +15,6 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
         `cd simulation/install` \
         `conda env create -f simulation.yml`
 - prepare the config.yml and input data \
-        Details in the supplemental materials
-- start simulation \\
+        Details in the supplemental materials \
+- start simulation \
         `python ./SpliceSimulator.py -cfig ./config.ymll`
