@@ -1,15 +1,28 @@
-TST: TST12320
-addexons: null
-bam_path: /mnt/depts/dept04/compbio/projects/TST12320/simulation_demo_20250304_highCounts/spliceharm_prep/bams
+## Initiative 
+TST: TST1 # Project ID (not necessary)
+addexons: null # add any cryptic exon that is important to your anaylsis, in case StringTie cannot identify it 
+bam_path: ./bams # bam folder for bam files 
 bam_suffix: sorted_Aligned.out.bam
 cmdonly: false
-compare_info: /mnt/depts/dept04/compbio/projects/TST12320/simulation_demo_20250304_highCounts/spliceharm_prep/comparison.csv
-genome_fa: /home/ychen12/splicing/TST12320/4simulation/Human.GRCh38.v34.l1_5.ERCC.ref.fa
-genome_gtf: /home/ychen12/splicing/TST12320/4simulation/Human.GRCh38.v34.l1_5.ERCC.transcript.gtf
-indir: /home/ychen12/splicing/TST12320/SpliceHarmonization_tmp/
-junctionFC: 1.2
-junctionMAX: 25
-junction_filter: false
+compare_info: ./comparison.csv #comparison config spreadsheet
+sample_info: ./samplesheet.csv #sample sheet config spreasheet
+genome_fa: ./Human.GRCh38.v34.l1_5.ERCC.ref.fa # reference fasta file
+genome_gtf: ./Human.GRCh38.v34.l1_5.ERCC.transcript.gtf # reference gtf file, version need to be consistence with genome_fa
+output_path: ./SpliceHarmonization_tmp
+
+## SpliceHarmonization prep
+# rMATS parameters
+read_length: 100
+reads_type: paired
+rmats_allow_clipping: false
+rmats_cstat: 0.0001
+rmats_max_exon_length_for_nss: null
+rmats_min_intron_length_for_nss: null
+rmats_novel_splice_sites: true
+rmats_paired_stats: false
+rmats_variable_read_length: false
+
+# LeafCutter parameters
 leafcutter_anchor_len: 8
 leafcutter_max_intron_len: 50000
 leafcutter_max_plots: 30
@@ -20,31 +33,39 @@ leafcutter_min_samples_per_group: 2
 leafcutter_min_samples_per_intron: 2
 leafcutter_plots_fdr: 0.05
 leafviz_fdr_threshold: 1
+
+# MAJIQ parameters
 majiq_cutoff_val: 0.95
 majiq_cutoffs:
 - 0.1
 - 0.2
 - 0.3
 - 0.4
-output_path: /home/ychen12/splicing/TST12320/SpliceHarmonization_tmp/
-read_length: 100
-reads_type: paired
-rmats_allow_clipping: false
-rmats_cstat: 0.0001
-rmats_max_exon_length_for_nss: null
-rmats_min_intron_length_for_nss: null
-rmats_novel_splice_sites: true
-rmats_paired_stats: false
-rmats_variable_read_length: false
+
+# StringTie parameters
+strand: 1
+stringtie_min_cov: 3
+stringtie_min_isoform_frac: 0.001
+stringtie_min_jxn_cov: 3
 run:
 - leafcutter
 - rmats
 - stringtie
 - majiq
-sample_info: /mnt/depts/dept04/compbio/projects/TST12320/simulation_demo_20250304_highCounts/spliceharm_prep/samplesheet.csv
+
+## SpliceHarmonization
+# basic
 specific_comparison: null
-strand: 1
-stringtie_min_cov: 3
-stringtie_min_isoform_frac: 0.001
-stringtie_min_jxn_cov: 3
-wdir: /home/ychen12/splicing/TST12320/SpliceHarmonization_tmp/
+
+#additional features to detect junction counts 
+junction_filter: false
+junctionFC: 1.2
+junctionMAX: 25
+
+
+
+
+
+
+
+
