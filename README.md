@@ -19,7 +19,7 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
         `conda create -n env -f install.yml`
 
 ### SpliceHarmonization
-- prepare the config.yml and input data \
+- prepare the config.yml and input data 
     - config.yml: please see an exmample in test/config.yml
     - samplesheet.csv: please see an example in test/samplesheet.csv
     - comparison.csv: please see an example in test/comparison.csv
