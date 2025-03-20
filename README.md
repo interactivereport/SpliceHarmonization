@@ -20,9 +20,9 @@ SpliceHarmonization is an integrated approach that leverages the strengths of di
 
 ### SpliceHarmonization
 - prepare the config.yml and input data 
-    - config.yml: please see an exmample in test/config.yml
-    - samplesheet.csv: please see an example in test/samplesheet.csv
-    - comparison.csv: please see an example in test/comparison.csv
+    - config.yml: please see an exmample in `test/config.yml`
+    - samplesheet.csv: please see an example in `test/samplesheet.csv`
+    - comparison.csv: please see an example in `test/comparison.csv`
 - start SpliceHarmonization \
   `python ./spliceharmonization.py -cfig ./config.yml`
   
