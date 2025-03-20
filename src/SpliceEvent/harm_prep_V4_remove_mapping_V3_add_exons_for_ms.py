@@ -129,7 +129,6 @@ del flattened_junctions
 
 ########
 print('junction library generation completed ...')
-# df_junction = pd.read_csv(args.outdir + '/permutative_junctions.csv')
 
 ########
 # mapping junctions from three algorithm to reference junciton library
@@ -144,9 +143,8 @@ residual_sj = sj[~sj['junction_filter'].apply(lambda x: x in unique_gene_junctio
 residual_sj.to_csv(args.outdir + '/residual_sj.csv', index=False)
 annotated_sj = filtered_sj.merge(df_junction, left_on=['start', 'end', 'geneSymbol'], 
                                right_on=['junction_start', 'junction_end', 'gene_name'], 
-                               )
+                               how='left')
 
-print(annotated_sj)
 missing_gene = set(sj['geneSymbol']) - set(annotated_sj['geneSymbol'])
 print('the number of missing genes by briefly mapping to junction library is {}'.format(len(missing_gene)))
 print(missing_gene)

@@ -4,13 +4,12 @@ from datetime import datetime
 from slurmUtils import create_sbatch_script, write_sbatch_script
 
 class SplicePrepPipeline:
-    def __init__(self):
+    def __init__(self, config):
         self.g_pipePath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.g_debug = False
-        self.g_config = None
+        self.g_config = config
         self.g_sysConfig = None
         self.g_script=None
-        # self.spliceprep_dir = None
 
     def msgError(self, msg):
         print('\n'.join(msg))
@@ -20,14 +19,16 @@ class SplicePrepPipeline:
         with open(os.path.join(self.g_pipePath,'src/SplicePrep','sys.yml'),'r') as f:
             self.g_sysConfig = yaml.safe_load(f)
 
-    def getConfig(self, strConfig):
+    @staticmethod
+    def getConfig(strConfig):
         with open(strConfig,'r') as f:
-            self.g_config = yaml.safe_load(f)
+            config = yaml.safe_load(f)
+        return config
 
     def checkConfig(self):
         errorMsg = []
         if not os.path.isfile(self.g_config['sample_info']):
-            errorMsg.append('Missing the sample info file: %s'%self.checkConfigself.g_config['sample_info'])
+            errorMsg.append('Missing the sample info file: %s'%self.g_config['sample_info'])
         if not os.path.isfile(self.g_config['compare_info']):
             errorMsg.append('Missing the compare info file: %s'%self.g_config['compare_info'])
         if not os.path.isfile(self.g_config['genome_fa']):
@@ -324,18 +325,32 @@ class SplicePrepPipeline:
             strRef = re.sub(" ","_",self.g_cInfo.Group[i]+"_"+self.g_cInfo.Ref[i])+".txt"
             strAlt = re.sub(" ","_",self.g_cInfo.Group[i]+"_"+self.g_cInfo.Alt[i])+".txt"
             cmd = ["module load rMATS-turbo"]
-            cmd.append("rmats.py --b1 %s --b2 %s --gtf %s -t %s --libType %s --readLength %d --nthread 4 --od %s --tmp %s --cstat %f%s"%(
-                os.path.join(strTmp,strRef),
-                os.path.join(strTmp,strAlt),
-                self.g_config['genome_gtf'],
-                self.g_config['reads_type'],
-                library_type,
-                self.g_config['read_length'],
-                oneOut,
-                os.path.join(oneOut,'rmat_tmp'),
-                self.g_config['rmats_cstat'],
-                var_read_length+paired_stats+clipping+novel_splice_sites
-            ))
+            if self.g_config['rmats_novel_splice_sites']:
+                cmd.append("rmats.py --novelSS --b1 %s --b2 %s --gtf %s -t %s --libType %s --readLength %d --nthread 4 --od %s --tmp %s --cstat %f%s"%(
+                    os.path.join(strTmp,strRef),
+                    os.path.join(strTmp,strAlt),
+                    self.g_config['genome_gtf'],
+                    self.g_config['reads_type'],
+                    library_type,
+                    self.g_config['read_length'],
+                    oneOut,
+                    os.path.join(oneOut,'rmat_tmp'),
+                    self.g_config['rmats_cstat'],
+                    var_read_length+paired_stats+clipping+novel_splice_sites
+                ))
+            else:
+                cmd.append("rmats.py --b1 %s --b2 %s --gtf %s -t %s --libType %s --readLength %d --nthread 4 --od %s --tmp %s --cstat %f%s"%(
+                    os.path.join(strTmp,strRef),
+                    os.path.join(strTmp,strAlt),
+                    self.g_config['genome_gtf'],
+                    self.g_config['reads_type'],
+                    library_type,
+                    self.g_config['read_length'],
+                    oneOut,
+                    os.path.join(oneOut,'rmat_tmp'),
+                    self.g_config['rmats_cstat'],
+                    var_read_length+paired_stats+clipping+novel_splice_sites
+                ))
             cmd.append("cd %s"%oneOut)
             cmd.append("find -type f -name '*MATS.JCEC.txt' -exec sh -c 'cp $0 %s_vs_%s_$(basename $0)' {} \;"%(self.g_cInfo.Alt[i],self.g_cInfo.Ref[i]))
             oneScript = self.getOneSbatch('rM_'+os.path.basename(oneOut),strSbatch,cmd,4)
@@ -461,7 +476,7 @@ class SplicePrepPipeline:
                 time.sleep(poll_interval)
 
     
-    def finalize(self, strConfig, strPrj, jIDs=None):
+    def finalize(self, strConfig, jIDs=None):
         if jIDs is not None:
             print("Finalize job")
             if len(jIDs)>0:
@@ -477,7 +492,6 @@ class SplicePrepPipeline:
                                shell=True, check=True, capture_output=True, text=True)
             # return
         
-        self.getConfig(strConfig)
         self.getSysConfig()
         self.wait_for_jobs_to_complete()
         
@@ -496,7 +510,7 @@ class SplicePrepPipeline:
                         print("\t\tError in", os.path.basename(log_file))
         # create projects
         print("Finalizing files ...")
-        # strPrj = None
+        strPrj = self.g_config['wdir']
         if self.g_config['TST'] is not None:
             # timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             # user = os.getenv('USER')
@@ -504,8 +518,8 @@ class SplicePrepPipeline:
             os.makedirs(strPrj, exist_ok=True)
             shutil.copy(self.g_config['sample_info'], strPrj)
             shutil.copy(self.g_config['compare_info'], strPrj)
-            self.g_config['sample_info'] = os.path.basename(self.g_config['sample_info'])
-            self.g_config['compare_info'] = os.path.basename(self.g_config['compare_info'])
+            self.g_config['sample_info'] = os.path.join(strPrj, os.path.basename(self.g_config['sample_info']))
+            self.g_config['compare_info'] = os.path.join(strPrj, os.path.basename(self.g_config['compare_info']))
             with open(os.path.join(strPrj, 'config.yml'), "w") as f:
                 yaml.dump(self.g_config, f)
                 
@@ -518,22 +532,22 @@ class SplicePrepPipeline:
                     os.makedirs(onePrj,exist_ok=True)
                 for pattern in self.g_sysConfig[job]:
                     pattern_path = os.path.join(strLocal, 'tmp', '**', pattern)
-                for f in glob.glob(pattern_path, recursive=True):
-                    dest_local = os.path.join(strLocal, os.path.basename(f))
-                    if not os.path.isfile(dest_local):
-                        shutil.copy(f, strLocal)
-                    if onePrj is not None:
-                        dest_project = os.path.join(onePrj, os.path.basename(f))
-                        if not os.path.isfile(dest_project):
-                            shutil.copy(f, onePrj)
+                    for f in glob.glob(pattern_path, recursive=True):
+                        dest_local = os.path.join(strLocal, os.path.basename(f))
+                        if not os.path.isfile(dest_local):
+                            shutil.copy(f, strLocal)
+                        if onePrj is not None:
+                            dest_project = os.path.join(onePrj, os.path.basename(f))
+                            if not os.path.isfile(dest_project):
+                                shutil.copy(f, dest_project)
+                        # print(f, dest_local, dest_project)
         if strPrj is not None:
             print("\n*** A project folder is created in: %s***\n"%strPrj)
         
         return 
 
-    def run(self, strConfig, strPrj):
+    def run(self):
         # Load config from command-line argument (sys.argv[2])
-        self.getConfig(strConfig)
         self.checkConfig()
         self.getSbatch()
         index_jobID = self.getBAMindex()
@@ -542,27 +556,24 @@ class SplicePrepPipeline:
         allJobs += self.leafcutter_run(index_jobID) or []
         allJobs += self.rmats_run() or []
         allJobs += self.majiq_run(index_jobID) or []
-        self.finalize(strConfig, strPrj, allJobs)
+        print('allJobs', allJobs)
+        self.finalize(allJobs)
         return 
 
-def main(config_file=None, strPrj=None):
-    pipeline = SplicePrepPipeline()
-    if config_file is not None:
-        pipeline.run(config_file, strPrj)
+def main(config=None, config_file=None, strPrj=None):
+    if config is not None:
+        pipeline = SplicePrepPipeline(config)
+        pipeline.run()
         return
-
     # Otherwise, use sys.argv to determine mode and config.
-    mode = sys.argv[1] if len(sys.argv) > 1 else 'main'
-    if len(sys.argv) > 2:
-        config_file = sys.argv[2]
-    # else:
-    #     config_file = 'config.yml'
-    
+    mode = sys.argv[1] 
+    config_file = sys.argv[2]
+    config = SplicePrepPipeline.getConfig(config_file)
+    pipeline = SplicePrepPipeline(config)
     if mode == 'main':
-        pipeline.run(config_file, strPrj)
-    
+        pipeline.run()
     elif mode == 'final':
-        pipeline.finalize(config_file, strPrj) 
+        pipeline.finalize(config_file) 
     else:
         pipeline.msgError(["Error: unknown task: %s" % mode])
 

@@ -120,7 +120,7 @@ leafViz <- bind_rows(leafViz, .id = "comparison")
 
 res <- res %>% 
     left_join(leafViz, by = c("cluster" = "clusters")) %>% 
-    select(c('comparison.x', 'intron', 'reference',s
+    select(c('comparison.x', 'intron', 'reference',
                         'alternative', 'chr', 
                         'start', 'end', 
                         'strand', 'p.adjust', 

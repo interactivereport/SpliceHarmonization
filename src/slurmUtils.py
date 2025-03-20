@@ -2,38 +2,38 @@ import os
 
 slurmScript = """#!/bin/bash
 #SBATCH -J jID_jName
-#SBATCH -D wkPath
+##SBATCH -D wkPath
 #SBATCH -n CoreNum
 #SBATCH --nodes=1
 #SBATCH -t 72:0:0
 #SBATCH --mem=MEMFREEG
-#SBATCH -o jName.o.log
-#SBATCH -e jName.e.log
+#SBATCH -o wkPath/jName.o.log
+#SBATCH -e wkPath/jName.e.log
 #- End embedded arguments
 echo $SLURM_JOB_NODELIST
-source srcPath/src/.env
-eval $condaEnv
-set -e
+source /home/hzhang13/.bashrc
+conda activate /edgehpc/dept/compbio/users/hzhang13/envs/splice
+
 RUMCMD
 
 echo 'DONE'
 """
 slurmArray = """#!/bin/bash
 #SBATCH -J jID_jName
-#SBATCH -D wkPath
+##SBATCH -D wkPath
 #SBATCH --partition=cpu
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=CoreNum
 #SBATCH -t 72:0:0
 #SBATCH --mem=MEMFREEG
 #SBATCH --array=1-ARRAYN
-#SBATCH -o jName.o.log
-#SBATCH -e jName.e.log
+#SBATCH -o wkPath/jName.o.log
+#SBATCH -e wkPath/jName.e.log
 #- End embedded arguments
 echo $SLURM_JOB_NODELIST
-source srcPath/src/.env
-eval $condaEnv
-set -e
+source /home/hzhang13/.bashrc
+conda activate /edgehpc/dept/compbio/users/hzhang13/envs/splice
+
 #echo "Task: $SLURM_ARRAY_TASK_ID"
 RUMCMD
 
@@ -58,7 +58,6 @@ def create_sbatch_script(jName, output_path, cmd, n_tasks=4, mem_free=None, time
     #- End embedded arguments
     echo $SLURM_JOB_NODELIST
     echo 'end of HOST'
-    set -e
 
     {cmd_str}
 

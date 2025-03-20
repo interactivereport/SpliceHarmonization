@@ -1,6 +1,7 @@
 localPath: /edgehpc/dept/compbio/projects/
 rmats: ['*_vs_*.MATS.JCEC.txt']
 leafcutter: ['*_vs_*res_cluster_significance.txt', '*_vs_*res_effect_sizes.txt', '*_vs_*leafviz.Rdata']
+# leafcutter: ['*_vs_*res_effect_sizes.txt']
 majiq: ['*_vs_*voila.tsv']
 stringtie: ['*_vs_*.combined.gtf']
 mastertable: ['*_vs_*master_table.csv']
