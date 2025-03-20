@@ -32,6 +32,14 @@ option_list <- list(
     default = "DMSO",
     help = "Specify the DMSO string [default]",
     metavar = "character"
+  ),
+
+  make_option(
+    c("-M", "--M_cutoff"),
+    type = 'double',
+    default = 0,
+    help = 'M_cutoff values',
+    metavar = 'character'
   )
 )
 
@@ -42,7 +50,7 @@ map.m <- function(x) {
   sum(as.numeric(unlist(strsplit(x, split = ",")))) / length(as.numeric(unlist(strsplit(x, split = ","))))
 }
 
-process_RMATS_ass <- function(df, start, end , type, FDR = 0.05, m_cutoff=50) {
+process_RMATS_ass <- function(df, start, end , type, FDR = 1.1, m_cutoff=opt$M_cutoff) {
   df <- df %>%
     mutate(SJC1_mean = map_dbl(SJC_SAMPLE_1, function(x) map.m(x)),
          SJC2_mean = map_dbl(SJC_SAMPLE_2, function(x) map.m(x)),  # Corrected this line
@@ -79,7 +87,7 @@ process_RMATS_ass <- function(df, start, end , type, FDR = 0.05, m_cutoff=50) {
 #' @return GenomicRange of the selected SJ
 #' @export
 #'
-process_RMATS <- function(df, start, end, type, FDR = 1.1, m_cutoff=50) {
+process_RMATS <- function(df, start, end, type, FDR = 1.1, m_cutoff=opt$M_cutoff) {
   df <- df %>%
     mutate(SJC1_mean = map_dbl(SJC_SAMPLE_1, function(x) map.m(x)),
          SJC2_mean = map_dbl(SJC_SAMPLE_2, function(x) map.m(x)),  # Corrected this line
