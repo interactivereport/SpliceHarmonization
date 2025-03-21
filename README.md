@@ -29,7 +29,7 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
   `python ./spliceharmonization.py -cfig ./config.yml`
 
 - Output tree view
-  ```bash
+```python
 {output_path} (#output directory)
 ├── {timestamp}_{userName} (# ouptput folder)
 │   ├── {Comparison}
