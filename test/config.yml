@@ -1,6 +1,6 @@
 # --------------- Gloabl Configuration ---------------
 ## Initiative 
-TST: TST1 # Project ID (not necessary)
+TST: TST1 # Project ID 
 conda_env: /edgehpc/dept/compbio/users/envs/splice # conda environment
 cmdonly: false
 output_path: ./SpliceHarmonization_tmp #output directory
