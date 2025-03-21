@@ -29,15 +29,15 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
   `python ./spliceharmonization.py -cfig ./config.yml`
 
 - Output tree view
-```python
+```markdown
 {output_path} (#output directory)
-├── {timestamp}_{userName} (# ouptput folder)
+├── ** {timestamp}_{userName} (# ouptput folder)** 
 │   ├── {Comparison}
 │   │   ├── harm
 │   │   ├── junction_prep
 │   │   ├── out
 │   │   │   ├── all_gene
-│   │   │   │   ├── {gene_names}.csv (# events output for each gene)
+│   │   │   │   ├── ** {gene_names}.csv (# events output for each gene)** 
 │   │   │   ├── all_gene_junction (# empty folder if junction_filter = False)
 │   │   │   └── mxe
 │   │   ├── run1.e.log
@@ -52,7 +52,7 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
 │   │   ├── run4.e.log
 │   │   ├── run4.o.log
 │   │   └── run4.sh
-│   ├── _cmdline_20250321.103736
+│   ├── _cmdline_{timestamp}
 │   ├── comparison.csv
 │   ├── config.yml
 │   ├── leafcutter (# orginial leafcutter output)
