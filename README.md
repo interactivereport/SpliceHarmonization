@@ -29,8 +29,8 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
   `python ./spliceharmonization.py -cfig ./config.yml`
 
 - Output tree view
-  `
-  {output_path} (#output directory)
+  ```bash
+{output_path} (#output directory)
 ├── {timestamp}_{userName} (# ouptput folder)
 │   ├── {Comparison}
 │   │   ├── harm
@@ -66,7 +66,7 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
 ├── majiq_output # tmp folder, can delete later
 ├── rmats_output # tmp folder, can delete later
 └── stringtie_output # tmp folder, can delete later
-  `
+```
   
 ### Splicing events simulation 
 - enter the folder and intall env \
