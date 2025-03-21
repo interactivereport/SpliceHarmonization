@@ -29,43 +29,44 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
   `python ./spliceharmonization.py -cfig ./config.yml`
 
 - Output tree view
+  `
   {output_path} (#output directory)
-  ├── {timestamp}_{userName} (# ouptput folder)
-  │   ├── {Comparison}
-  │   │   ├── harm
-  │   │   ├── junction_prep
-  │   │   ├── out
-  │   │   │   ├── all_gene
-  │   │   │   │   ├── {gene_names}.csv (# events output for each gene)
-  │   │   │   ├── all_gene_junction (# empty folder if junction_filter = False)
-  │   │   │   └── mxe
-  │   │   ├── run1.e.log
-  │   │   ├── run1.o.log
-  │   │   ├── run1.sh
-  │   │   ├── run2.e.log
-  │   │   ├── run2.o.log
-  │   │   ├── run2.sh
-  │   │   ├── run3.e.log
-  │   │   ├── run3.o.log
-  │   │   ├── run3.sh
-  │   │   ├── run4.e.log
-  │   │   ├── run4.o.log
-  │   │   └── run4.sh
-  │   ├── _cmdline_20250321.103736
-  │   ├── comparison.csv
-  │   ├── config.yml
-  │   ├── leafcutter (# orginial leafcutter output)
-  │   ├── majiq (# orginial majiq output)
-  │   ├── rmats (# orginial rmats output)
-  │   ├── samplesheet.csv
-  │   ├── status.log
-  │   └── stringtie (# orginial stringtie output)
-  ├── BAM_index_sbatch # tmp folder, can delete later
-  ├── leafcutter_output # tmp folder, can delete later
-  ├── majiq_output # tmp folder, can delete later
-  ├── rmats_output # tmp folder, can delete later
-  └── stringtie_output # tmp folder, can delete later
-
+├── {timestamp}_{userName} (# ouptput folder)
+│   ├── {Comparison}
+│   │   ├── harm
+│   │   ├── junction_prep
+│   │   ├── out
+│   │   │   ├── all_gene
+│   │   │   │   ├── {gene_names}.csv (# events output for each gene)
+│   │   │   ├── all_gene_junction (# empty folder if junction_filter = False)
+│   │   │   └── mxe
+│   │   ├── run1.e.log
+│   │   ├── run1.o.log
+│   │   ├── run1.sh
+│   │   ├── run2.e.log
+│   │   ├── run2.o.log
+│   │   ├── run2.sh
+│   │   ├── run3.e.log
+│   │   ├── run3.o.log
+│   │   ├── run3.sh
+│   │   ├── run4.e.log
+│   │   ├── run4.o.log
+│   │   └── run4.sh
+│   ├── _cmdline_20250321.103736
+│   ├── comparison.csv
+│   ├── config.yml
+│   ├── leafcutter (# orginial leafcutter output)
+│   ├── majiq (# orginial majiq output)
+│   ├── rmats (# orginial rmats output)
+│   ├── samplesheet.csv
+│   ├── status.log
+│   └── stringtie (# orginial stringtie output)
+├── BAM_index_sbatch # tmp folder, can delete later
+├── leafcutter_output # tmp folder, can delete later
+├── majiq_output # tmp folder, can delete later
+├── rmats_output # tmp folder, can delete later
+└── stringtie_output # tmp folder, can delete later
+  `
   
 ### Splicing events simulation 
 - enter the folder and intall env \
