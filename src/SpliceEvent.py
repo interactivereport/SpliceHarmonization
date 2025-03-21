@@ -42,7 +42,7 @@ class SpliceEventPipeline:
             #print("## git HEAD: %s\n###########\n"%gitLog[1])
 
     def get_comparison(self):
-        stringtie_path = os.path.join(self.g_config['indir'], "stringtie")
+        stringtie_path = os.path.join(self.g_config['wdir'], "stringtie")
         if not os.path.isdir(stringtie_path):
             self.exit_with_msg("Missing stringtie folder: %s"%stringtie_path)
         comp = [re.sub('.combined.gtf$','', os.path.basename(_)) for _ in glob.glob(os.path.join(stringtie_path,"*.combined.gtf"))]
@@ -66,7 +66,7 @@ class SpliceEventPipeline:
                 time.sleep(60)
 
     def get_one_cmd(self, oneComp):
-        data_folder = self.g_config['indir']
+        data_folder = self.g_config['wdir']
         bam_folder = self.g_config['bam_path']
         wd_folder = self.g_config['wdir']
         reference = self.g_config['genome_gtf']
@@ -265,7 +265,8 @@ class SpliceEventPipeline:
                 replace('CoreNum',f"{aTask['cpu']*(1+aTask['run'])}").
                 replace('MEMFREE',f"{aTask['mem']*(1+aTask['run'])}").
                 replace('srcPath',self.strPipePath).
-                replace('RUMCMD',aTask['cmd']))
+                replace('RUMCMD',aTask['cmd']).
+                replace('CONDAENV', self.g_config['conda_env']))
         else:
             subScript = (slurmArray.
                 replace("jID",os.path.basename(aTask['wd'])).
@@ -275,7 +276,8 @@ class SpliceEventPipeline:
                 replace('MEMFREE',f"{aTask['mem']*(1+aTask['run'])}").
                 replace('ARRAYN',f"{aTask['task']}").
                 replace('srcPath',self.strPipePath).
-                replace('RUMCMD',aTask['cmd']))
+                replace('RUMCMD',aTask['cmd']).
+                replace('CONDAENV', self.g_config['conda_env']))
         fscript = os.path.join(aTask['wd'],rID+'.sh')
         with open(fscript,'w') as f:
             f.write(subScript)

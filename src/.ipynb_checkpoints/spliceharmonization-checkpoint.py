@@ -18,6 +18,21 @@ def powerMsg():
     print("\nSpliceHarmonization Pipeline Powered by the Biogen Computational Analytical Group "
           "[yirui.chen@biogen.com]\n")
     
+def yaml_dump(args, config):
+    prefix = args.cfig.split('.')[0]
+    insert = True
+    with open(f'{prefix}.tmp.yaml', 'w') as f_out:
+        with open(f'{args.cfig}', 'r') as f_in:
+            for line in f_in.readlines():
+                if line.startswith('#'):
+                    f_out.write(line)
+                    if insert:
+                        f_out.write(f"wdir: {config['wdir']}\n")
+                        insert = False
+                else:
+                    f_out.write(line)
+    shutil.move(f'{prefix}.tmp.yaml', args.cfig)
+
 def main():
     print("Script started", flush=True)
     args = get_arg()
@@ -34,14 +49,9 @@ def main():
         strPrj = os.path.join(g_config['output_path'], f"{timestamp}_{user}")
         os.makedirs(strPrj,exist_ok=True)
         g_config['wdir'] = strPrj
-        g_config['indir'] = strPrj
-    else:
-        g_config['indir'] = g_config['wdir']
-
-    # write the updated config file
-    print('Rewrite config file')
-    with open(args.cfig, 'w') as file:
-        yaml.dump(g_config, file)
+        # write the updated config file
+        print('Rewrite config file')
+        yaml_dump(args, g_config)
 
     print("Arguments parsed:", args, flush=True)
   

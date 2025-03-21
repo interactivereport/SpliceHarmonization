@@ -11,8 +11,8 @@ slurmScript = """#!/bin/bash
 #SBATCH -e wkPath/jName.e.log
 #- End embedded arguments
 echo $SLURM_JOB_NODELIST
-source /home/hzhang13/.bashrc
-conda activate /edgehpc/dept/compbio/users/hzhang13/envs/splice
+module load Anaconda3
+conda activate CONDAENV
 
 RUMCMD
 
@@ -31,8 +31,8 @@ slurmArray = """#!/bin/bash
 #SBATCH -e wkPath/jName.e.log
 #- End embedded arguments
 echo $SLURM_JOB_NODELIST
-source /home/hzhang13/.bashrc
-conda activate /edgehpc/dept/compbio/users/hzhang13/envs/splice
+module load Anaconda3
+conda activate CONDAENV
 
 #echo "Task: $SLURM_ARRAY_TASK_ID"
 RUMCMD
@@ -57,7 +57,8 @@ def create_sbatch_script(jName, output_path, cmd, n_tasks=4, mem_free=None, time
     #SBATCH -e {log_file}
     #- End embedded arguments
     echo $SLURM_JOB_NODELIST
-    echo 'end of HOST'
+    module load Anaconda3
+    conda activate CONDAENV
 
     {cmd_str}
 

@@ -1,7 +1,6 @@
 import os,sys,yaml,subprocess,re,glob,shutil,time
 import pandas as pd
 from datetime import datetime
-from slurmUtils import create_sbatch_script, write_sbatch_script
 
 class SplicePrepPipeline:
     def __init__(self, config):
