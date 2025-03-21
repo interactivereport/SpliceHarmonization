@@ -67,6 +67,9 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
 ├── rmats_output # tmp folder, can delete later
 └── stringtie_output # tmp folder, can delete later
 ```
+Two dataset outputs at https://zenodo.org/uploads/15032402
+- A public dataset: SMN2_public_dataset.tar.gz (SRP334251)
+- A simulated dataset: simulation_validation.tar.gz
   
 ### Splicing events simulation 
 - enter the folder and intall env \
