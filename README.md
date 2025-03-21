@@ -3,11 +3,13 @@
 ## About
 SpliceHarmonization is an integrated approach that leverages the strengths of different alternative splicing detection methods, thereby facilitating robust and reliable analysis of splicing events with annotations.
 ### Required dependencies
+SpliceHarmonization requires execution on a high-performance computing (HPC) platform.
 - rMATS: https://github.com/Xinglab/rmats-turbo/blob/master/README.md
 - LeafCutter: https://github.com/davidaknowles/leafcutter/tree/master/conda_recipe
 - MAJIQ: https://biociphers.bitbucket.io/majiq-docs-academic/getting-started-guide/installing.html
 - StringTie: https://ccb.jhu.edu/software/stringtie
 - SAMTools
+- Anaconda
 - Python
 - R
   
