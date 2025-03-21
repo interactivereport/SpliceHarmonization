@@ -31,13 +31,13 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
 - Output tree view
 ```markdown
 {output_path} (#output directory)
-├── ** {timestamp}_{userName} (# ouptput folder)** 
+├── {timestamp}_{userName} (# ouptput folder)
 │   ├── {Comparison}
 │   │   ├── harm
 │   │   ├── junction_prep
 │   │   ├── out
 │   │   │   ├── all_gene
-│   │   │   │   ├── ** {gene_names}.csv (# events output for each gene)** 
+│   │   │   │   ├── {gene_names}.csv (# events output for each gene)
 │   │   │   ├── all_gene_junction (# empty folder if junction_filter = False)
 │   │   │   └── mxe
 │   │   ├── run1.e.log
