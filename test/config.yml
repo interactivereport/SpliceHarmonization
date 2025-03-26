@@ -10,7 +10,7 @@ output_path: ./SpliceHarmonization_tmp #output directory
 genome_fa: ./Human.GRCh38.v34.l1_5.ERCC.ref.fa
 genome_gtf: ./Human.GRCh38.v34.l1_5.ERCC.transcript.gtf
 bam_path: ./bams # bam folder for bam files 
-bam_suffix: sorted_Aligned.out.bam
+bam_suffix: sorted_Aligned.out.bam # please make sure this match the suffix of bam files
 compare_info: ./comparison.csv # example in test folder
 sample_info: ./samplesheet.csv # example in test folder
 addexons: null # add any cryptic exon that is important to your anaylsis, in case StringTie cannot identify it 

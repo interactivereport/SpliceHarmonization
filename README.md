@@ -25,6 +25,7 @@ SpliceHarmonization requires execution on a high-performance computing (HPC) pla
     - config.yml: please see an exmample in `test/config.yml`
     - samplesheet.csv: please see an example in `test/samplesheet.csv`
     - comparison.csv: please see an example in `test/comparison.csv`
+    - directory for bam files: that path need to be addressed in config.yml
 - start SpliceHarmonization \
   `python ./spliceharmonization.py -cfig ./config.yml`
 
