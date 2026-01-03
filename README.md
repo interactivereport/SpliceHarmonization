@@ -2,6 +2,8 @@
 
 ## About
 SpliceHarmonization is an integrated approach that leverages the strengths of different alternative splicing detection methods, thereby facilitating robust and reliable analysis of splicing events with annotations.
+SpliceHarmonization is provided as a research framework; external tools such as MAJIQ are not redistributed and must be installed separately in accordance with their respective licenses.
+
 ### Required dependencies
 SpliceHarmonization requires execution on a high-performance computing (HPC) platform.
 - rMATS: https://github.com/Xinglab/rmats-turbo/blob/master/README.md
